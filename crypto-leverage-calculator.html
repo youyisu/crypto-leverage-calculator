@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>加密貨幣交易計算器</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>加密貨幣交易計算器</h1>
+    
+    <div class="section">
+        <h2>槓桿計算</h2>
+        <div class="input-group">
+            <label for="entryPrice">開倉價位 (USDT)</label>
+            <input type="number" id="entryPrice" step="0.01" required>
+        </div>
+
+        <div class="input-group">
+            <label for="stopLoss">止損價位 (USDT)</label>
+            <input type="number" id="stopLoss" step="0.01" required>
+        </div>
+
+        <div class="input-group">
+            <label for="margin">開倉金 (USDT)</label>
+            <input type="number" id="margin" step="0.01" required>
+        </div>
+
+        <div class="input-group">
+            <label for="maxLoss">可承受損失金額 (USDT)</label>
+            <input type="number" id="maxLoss" step="0.01" required>
+        </div>
+
+        <button onclick="calculateLeverage()">計算所需槓桿</button>
+
+        <div class="result" id="leverageResult">
+            <h3>計算結果</h3>
+            <p id="priceChange"></p>
+            <p id="requiredLeverage"></p>
+            <p id="actualLoss"></p>
+        </div>
+    </div>
+
+    <script>
+        function calculateLeverage() {
+            // 獲取輸入值
+            const entryPrice = parseFloat(document.getElementById('entryPrice').value);
+            const stopLoss = parseFloat(document.getElementById('stopLoss').value);
+            const margin = parseFloat(document.getElementById('margin').value);
+            const maxLoss = parseFloat(document.getElementById('maxLoss').value);
+
+            // 計算價格變動幅度
+            const priceChange = Math.abs(stopLoss - entryPrice);
+            
+            // 計算所需槓桿
+            // 使用公式：損失 = (止損點 - 開倉點) × 倉位 / 開倉價格
+            // 轉換為：倉位 = (損失 × 開倉價格) / (止損點 - 開倉點)
+            // 槓桿 = 倉位 / 開倉金
+            const positionSize = (maxLoss * entryPrice) / priceChange;
+            const requiredLeverage = positionSize / margin;
+            
+            // 計算實際損失金額
+            const actualLoss = (priceChange * positionSize) / entryPrice;
+
+            // 顯示結果
+            document.getElementById('priceChange').textContent = 
+                `價格變動幅度: ${priceChange.toFixed(2)} USDT`;
+            document.getElementById('requiredLeverage').textContent = 
+                `所需槓桿倍數: ${requiredLeverage.toFixed(2)} 倍`;
+            document.getElementById('actualLoss').textContent = 
+                `實際損失金額: ${actualLoss.toFixed(2)} USDT`;
+        }
+    </script>
+</body>
+</html> 
