@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>加密貨幣槓桿計算器</title>
+    <meta name="description" content="加密貨幣交易槓桿計算工具">
+    <meta name="theme-color" content="#4CAF50">
+    <link rel="manifest" href="manifest.json">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .calculator {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            box-sizing: border-box;
+            -webkit-appearance: none;
+        }
+        input:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 5px rgba(76,175,80,0.2);
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 20px;
+            -webkit-appearance: none;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+        }
+        .result h2 {
+            color: #333;
+            margin-top: 0;
+            font-size: 1.5em;
+        }
+        .result-value {
+            font-size: 1.5em;
+            color: #4CAF50;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .warning {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            .calculator {
+                padding: 15px;
+            }
+            input {
+                font-size: 16px; /* 防止 iOS 縮放 */
+            }
+            .result-value {
+                font-size: 1.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <h1>加密貨幣槓桿計算器</h1>
+        
+        <div class="input-group">
+            <label for="entryPrice">開倉價位 (USDT)</label>
+            <input type="number" id="entryPrice" step="0.01" required placeholder="例如：50000" inputmode="decimal">
+        </div>
+
+        <div class="input-group">
+            <label for="stopLoss">止損價位 (USDT)</label>
+            <input type="number" id="stopLoss" step="0.01" required placeholder="例如：49000" inputmode="decimal">
+        </div>
+
+        <div class="input-group">
+            <label for="positionSize">開倉金額 (USDT)</label>
+            <input type="number" id="positionSize" step="0.01" required placeholder="例如：1000" inputmode="decimal">
+        </div>
+
+        <div class="input-group">
+            <label for="maxLoss">承受虧損金額 (USDT)</label>
+            <input type="number" id="maxLoss" step="0.01" required placeholder="例如：100" inputmode="decimal">
+        </div>
+
+        <button onclick="calculateLeverage()">計算所需槓桿</button>
+
+        <div class="result" id="result">
+            <h2>計算結果</h2>
+            <div id="leverageResult"></div>
+            <div id="priceChange"></div>
+            <div id="riskPercentage"></div>
+        </div>
+    </div>
+
+    <script>
+        function calculateLeverage() {
+            // 獲取輸入值
+            const entryPrice = parseFloat(document.getElementById('entryPrice').value);
+            const stopLoss = parseFloat(document.getElementById('stopLoss').value);
+            const positionSize = parseFloat(document.getElementById('positionSize').value);
+            const maxLoss = parseFloat(document.getElementById('maxLoss').value);
+
+            // 驗證輸入
+            if (!entryPrice || !stopLoss || !positionSize || !maxLoss) {
+                alert('請填寫所有欄位！');
+                return;
+            }
+
+            if (maxLoss >= positionSize) {
+                alert('承受虧損金額不能大於或等於開倉金額！');
+                return;
+            }
+
+            // 計算價格變動幅度
+            const priceChange = Math.abs(stopLoss - entryPrice);
+            
+            // 計算所需槓桿倍數
+            const leverage = (maxLoss * entryPrice) / (positionSize * priceChange);
+            
+            // 計算風險百分比
+            const riskPercentage = (maxLoss / positionSize) * 100;
+
+            // 顯示結果
+            document.getElementById('leverageResult').innerHTML = 
+                `<div class="result-value">所需槓桿倍數：${leverage.toFixed(2)} 倍</div>`;
+            
+            document.getElementById('priceChange').innerHTML = 
+                `價格變動幅度：${priceChange.toFixed(2)} USDT`;
+            
+            document.getElementById('riskPercentage').innerHTML = 
+                `風險百分比：${riskPercentage.toFixed(2)}%`;
+
+            // 添加風險提示
+            if (leverage > 100) {
+                document.getElementById('leverageResult').innerHTML += 
+                    '<div class="warning">警告：槓桿倍數過高，請謹慎操作！</div>';
+            }
+        }
+
+        // 防止 iOS 輸入框縮放
+        document.addEventListener('focus', function(e) {
+            if (e.target.tagName === 'INPUT') {
+                e.target.scrollIntoView({ behavior: 'smooth' });
+            }
+        }, true);
+    </script>
+</body>
+</html> 

@@ -1,0 +1,25 @@
+{
+  "name": "crypto-leverage-calculator",
+  "version": "1.0.0",
+  "description": "加密貨幣槓桿計算器",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^28.1.0",
+    "electron-builder": "^24.9.1"
+  },
+  "build": {
+    "appId": "com.crypto.leverage.calculator",
+    "mac": {
+      "category": "public.app-category.finance"
+    },
+    "win": {
+      "target": "nsis"
+    }
+  }
+} 
